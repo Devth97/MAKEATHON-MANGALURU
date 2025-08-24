@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta name="description"
+        content="A tool to help farmers">
+    <meta name="keywords" content="Agriculture">
+    <meta name="author" content="Subba">
+
+    <title>AgriHires</title>
+
+    <style>
+        html{
+            background-image: url(https://imgs.search.brave.com/cTXg-2NlZRsGoY0QKe0qk6JthrGSV7sm8MQ401xukKk/rs:fit:500:0:0/g:ce/aHR0cHM6Ly9tZWRp/YS5nZXR0eWltYWdl/cy5jb20vaWQvMTM0/MzA1NTU0L3Bob3Rv/L2Zhcm1lci1yaWRp/bmctdHJhY3Rvci5q/cGc_cz02MTJ4NjEy/Jnc9MCZrPTIwJmM9/aTNpUEhJQmtXc1R5/Y3k1WlBHU1Y1TGJO/LXpJeVMtSnBwV1Nm/MG1jWmJmdz0);
+        }
+        .chat-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .chat-container {
+            position: absolute;
+            width: 80%;
+            max-width: 400px;
+            /* Adjust this value as needed */
+            height: 500px;
+            border-radius: 10px;
+            background-color: #f8f8f8;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            top: 50%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-50%);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .header-container {
+            position: relative;
+            background-color: #a3d063;
+            /* Header background color */
+            color: #fff;
+            /* Header text color */
+            padding: 10px;
+            text-align: center;
+        }
+
+        .chatbot-name {
+            margin: 0;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .close-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #ffc107;
+            /* Yellow color */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 18px;
+            color: #333;
+            /* Text color */
+        }
+
+        .chat-input {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            height: 40px;
+            box-sizing: border-box;
+            width: calc(100% - 20px);
+            margin: 10px;
+            padding: 5px;
+        }
+
+        .send-button {
+            width: 80px;
+            height: 40px;
+            border-radius: 5px;
+            background-color: #a3d063;
+            border: 2px solid #a3d063;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.2s linear;
+            text-align: center;
+            margin: 10px;
+            align-self: flex-end;
+        }
+
+        .send-button:hover {
+            color: #a3d063;
+            background-color: #fff;
+        }
+
+
+        .chat-header {
+            text-align: center;
+            padding: 10px 0;
+            background-color: #fff;
+            /* You can customize the background color */
+            border-bottom: 1px solid #bcbdc0;
+            /* You can customize the border color */
+        }
+
+        .chat-name {
+            font-size: 24px;
+            font-family: 'Arial', sans-serif;
+            /* You can change the font family */
+            color: #333;
+            /* You can customize the text color */
+            text-transform: uppercase;
+            /* Uppercase the text */
+            letter-spacing: 2px;
+            /* Add some letter spacing */
+            margin-right: 10px;
+            /* Add some margin to separate from the close button */
+        }
+
+        .message_template {
+            display: none;
+        }
+
+        .message {
+            /* background: #F1F0F0; */
+            border: 1px solid #ffffff;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 5px 0;
+        }
+
+        .message.right {
+
+            text-align: end;
+        }
+
+        .message.left {
+            text-align: initial;
+        }
+
+        .appeared {
+            opacity: 1 !important;
+        }
+
+
+        /* Add styles for user and chatbot messages */
+        .message {
+            list-style-type: none;
+            margin: 5px 0;
+        }
+
+        .message.left .text_wrapper {
+            margin-left: 0%;
+        }
+
+        .message.right .text_wrapper {
+            margin-right: 0%;
+        }
+
+        .text_wrapper {
+            position: relative;
+        }
+
+        .text {
+            display: inline-block;
+            background: #def2d8;
+            padding: 10px;
+            border-radius: 10px;
+            word-wrap: break-word;
+            /* Added to allow long words to wrap to the next line */
+            max-width: 80%;
+            /* Added to set a maximum width for the message */
+        }
+
+
+
+        .avatar {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #a3d063;
+            margin-right: 10px;
+            position: absolute;
+            bottom: 0;
+        }
+
+    
+    </style>
+</head>
+
+<body>
+
+    <section class="header">
+        <nav>
+            <span class="icon" onclick="showmenu()">&#9776;</span>
+        </nav>
+
+        </div>
+        <button class="chat-button" onclick="openChatModal()">
+            <img src="chat.jpg" alt="Chat Icon">
+        </button>
+        <script>
+            function openChatModal() {
+                window.location.href = "chat_page.html";
+            }
+        </script>
+    </section>
+
+        <div id="chatModal" class="chat-modal" onclick="closeChatModal()">
+            <div class="chat-container" onclick="event.stopPropagation()">
+                <div class="header-container">
+                    <span class="close-button" onclick="closeChatModal()">&#10005;</span>
+                    <h3 class="chatbot-name">Mitra</h3>
+                </div>
+                <div class="chat-content">
+                    <!-- chat content here -->
+                    <ul id="chatMessages"></ul>
+                </div>
+                <form id="chatForm" onsubmit="sendMessage(); return false;">
+                    <input type="text" id="chatInput" class="chat-input" placeholder="Type your message here..." />
+                    <input type="submit" value="Send" class="send-button" />
+                </form>
+            </div>
+        </div>
+
+
+        <script>
+
+
+
+            function openChatModal() {
+                document.getElementById('chatModal').style.display = 'flex';
+            }
+
+            function closeChatModal() {
+                document.getElementById('chatModal').style.display = 'none';
+            }
+
+            // Function to handle form submission
+            function sendMessage() {
+                var inputElement = document.getElementById('chatInput');
+                var message = inputElement.value;
+
+                // Handle the message (customize this part if needed)
+                var chatContainer = document.getElementById('chatMessages');
+                var messageElement = document.createElement('li');
+                messageElement.textContent = message;
+                chatContainer.appendChild(messageElement);
+
+                // Clear the input field
+                inputElement.value = '';
+            }
+        </script>
+
+</body>
+
+<script>
+
+
+
+    function handleUserInput(userMessage) {
+        // Convert user message to lowercase in order to accept any form of input upper or lowercase
+        var lowerUserMessage = userMessage.toLowerCase();
+        if (lowerUserMessage.includes("vittal") ) {
+        return "Workers available --> 1. <a href='#' onclick='openLink(\"areca pluckers\")'>areca pluckers</a>\n2. <a href='#' onclick='openLink(\"Pesticide sprayers\")'>Pesticide sprayers</a>\n3. <a href='#' onclick='openLink(\"Grass grazers\")'>Grass grazers</a>";
+    } else if (lowerUserMessage.includes("areca pluckers") ) {
+        return "Contact info of Areca Pluckers --> 1. <a href='#' onclick='openLink(\"arun kumar\")'>Arun Kumar</a>\n2. <a href='#' onclick='openLink(\"Timmappa\")'>Timmappa</a>\n3. <a href='#' onclick='openLink(\"Somanna\")'>Somanna</a>\n4. <a href='#' onclick='openLink(\"latakka\")'>Latakka</a>";
+    } else if (lowerUserMessage.includes("pesticide sprayers") ) {
+        return "Contact info of Pesticide sprayers --> 1. <a href='#' onclick='openLink(\"siddappa\")'>siddappa</a>\n2. <a href='#' onclick='openLink(\"Timmappa\")'>Timmappa</a>\n3. <a href='#' onclick='openLink(\"Somanna\")'>Somanna</a>\n4. <a href='#' onclick='openLink(\"latakka\")'>Latakka</a>";
+    } else if (lowerUserMessage.includes("grass grazers") ) {
+        return "Contact info of Grass grazers --> 1. <a href='#' onclick='openLink(\"arun kumar\")'>Arun Kumar</a>\n2. <a href='#' onclick='openLink(\"Timmappa\")'>Timmappa</a>\n3. <a href='#' onclick='openLink(\"Somanna\")'>Somanna</a>\n4. <a href='#' onclick='openLink(\"latakka\")'>Latakka</a>";
+    }else if (lowerUserMessage.includes("arun kumar")) {
+        var answer1 = "1. <a href='#' onclick='openLink(\"Arun Kumar\")'>Arun Kumar  </a> --> <a href='#' onclick='openLink(\"phone\")'>990142687</a>";
+        // Second answer
+        var answer2 = " <a href='#' onclick='openLink(\"Shop\")'>Shop</a>";
+        // Combine both answers
+        var answer3 = " <a href='#' onclick='openLink(\"aboutus\")'>About Us</a>"
+        return answer1 + '<br>' + answer2 + '<br>' + answer3;
+    } else if (lowerUserMessage.includes("timmappa")) {
+        var answer1 = "1. <a href='#' onclick='openLink(\"timmappa\")'>Timmappa</a> --> <a href='#' onclick='openLink(\"phone\")'>4569852565</a>";
+        // Second answer
+        var answer2 = " <a href='#' onclick='openLink(\"Shop\")'>Shop</a>";
+        // Combine both answers
+        var answer3 = " <a href='#' onclick='openLink(\"aboutus\")'>About Us</a>"
+        return answer1 + '<br>' + answer2 + '<br>' + answer3; 
+    } else if (lowerUserMessage.includes("somanna")) {
+        var answer1 = "1. <a href='#' onclick='openLink(\"somanna\")'>Somanna </a> --> <a href='#' onclick='openLink(\"phone\")'>7890987656</a>";
+        // Second answer
+        var answer2 = " <a href='#' onclick='openLink(\"Shop\")'>Shop</a>";
+        // Combine both answers
+        var answer3 = " <a href='#' onclick='openLink(\"aboutus\")'>About Us</a>"
+        return answer1 + '<br>' + answer2 + '<br>' + answer3;
+    } else if (lowerUserMessage.includes("latakka")) {
+        var answer1 = "1. <a href='#' onclick='openLink(\"latakka\")'>Latakka</a> --> <a href='#' onclick='openLink(\"phone\")'>8987565434</a>";
+        // Second answer
+        var answer2 = " <a href='#' onclick='openLink(\"Shop\")'>Shop</a>";
+        // Combine both answers
+        var answer3 = " <a href='#' onclick='openLink(\"aboutus\")'>About Us</a>"
+        return answer1 + '<br>' + answer2 + '<br>' + answer3;
+    }else if (lowerUserMessage.includes("siddappa")) {
+        var answer1 = "1. <a href='#' onclick='openLink(\"siddappa\")'>siddappa  </a> --> <a href='#' onclick='openLink(\"phone\")'>876442687</a>";
+        // Second answer
+        var answer2 = " <a href='#' onclick='openLink(\"Shop\")'>Shop</a>";
+        // Combine both answers
+        var answer3 = " <a href='#' onclick='openLink(\"aboutus\")'>About Us</a>"
+        return answer1 + '<br>' + answer2 + '<br>' + answer3;
+    }else if (lowerUserMessage.includes("shop")) {
+        return "Coming Soon";
+    } else if (lowerUserMessage.includes("about us") || lowerUserMessage.includes("aboutus") ) {
+        return "our information";
+    } else {
+        var answer1 = "Select your location ";
+        // Second answer
+        var answer2 = "1. <a href='#' onclick='openLink(\"Vittal\")'>Vittal</a>";
+        // Combine both answers
+        var answer3 = "2. <a href='#' onclick='openLink(\"Puttur\")'>Puttur</a>"
+        return answer1 + '<br>' + answer2 + '<br>' + answer3;
+    }
+}
+
+function openLink(linkType) {
+    var chatContainer = document.getElementById('chatMessages');
+    var chatbotMessageElement = document.createElement('li');
+    chatbotMessageElement.className = 'message left';
+
+    switch (linkType.toLowerCase()) {
+        case "vittal":
+        chatbotMessageElement.innerHTML = '<div class="avatar"></div><div class="text_wrapper"><div class="text">Workers available --> 1. <a href="#" onclick="openLink(\'areca pluckers\')">areca pluckers</a>\n2. <a href="#" onclick="openLink(\'pesticide sprayers\')">Pesticide sprayers</a>\n3. <a href="#" onclick="openLink(\'Grass grazers\')">Grass grazers</a></div></div>';
+            break;
+            case "areca pluckers":
+    chatbotMessageElement.innerHTML = '<div class="avatar"></div><div class="text_wrapper"><div class="text">Contact info of Areca Pluckers --> 1. <a href="#" onclick="openLink(\'arun kumar\')">Arun Kumar</a>\n2. <a href="#" onclick="openLink(\'Timmappa\')">Timmappa</a>\n3. <a href="#" onclick="openLink(\'Somanna\')">Somanna</a>\n4. <a href="#" onclick="openLink(\'latakka\')">Latakka</a></div></div>';
+    break;
+    case "pesticide sprayers":
+    chatbotMessageElement.innerHTML = '<div class="avatar"></div><div class="text_wrapper"><div class="text">Contact info of Pesticide sprayers --> 1. <a href="#" onclick="openLink(\'siddappa\')">siddappa</a>\n2. <a href="#" onclick="openLink(\'Timmappa\')">Timmappa</a>\n3. <a href="#" onclick="openLink(\'Somanna\')">Somanna</a>\n4. <a href="#" onclick="openLink(\'latakka\')">Latakka</a></div></div>';
+    break;
+    case "grass grazers":
+    chatbotMessageElement.innerHTML = '<div class="avatar"></div><div class="text_wrapper"><div class="text">Contact info of Grass grazers --> 1. <a href="#" onclick="openLink(\'arun kumar\')">Arun Kumar</a>\n2. <a href="#" onclick="openLink(\'Timmappa\')">Timmappa</a>\n3. <a href="#" onclick="openLink(\'Somanna\')">Somanna</a>\n4. <a href="#" onclick="openLink(\'latakka\')">Latakka</a></div></div>';
+    break;
+    case "arun kumar":
+    var answer1 = '<div class="avatar"></div><div class="text_wrapper"><div class="text">1. <a href="#" onclick="openLink(\'Arun Kumar\')">Arun Kumar</a> --> <a href="#" onclick="openLink(\'phone\')">990142687</a></div></div>';
+    // Second answer
+    var answer2 = '<div class="avatar"></div><div class="text_wrapper"><div class="text"><a href="#" onclick="openLink(\'Shop\')">Shop</a></div></div>';
+    // Combine both answers
+    var answer3 = '<div class="avatar"></div><div class="text_wrapper"><div class="text"><a href="#" onclick="openLink(\'aboutus\')">About Us</a></div></div>';
+    chatbotMessageElement.innerHTML = answer1 + '<br>' + answer2 + '<br>' + answer3;
+    break;
+    case "timmappa":
+    var answer1 = '<div class="avatar"></div><div class="text_wrapper"><div class="text">1. <a href="#" onclick="openLink(\'timmappa\')">Timmappa</a> --> <a href="#" onclick="openLink(\'phone\')">990142687</a></div></div>';
+    // Second answer
+    var answer2 = '<div class="avatar"></div><div class="text_wrapper"><div class="text"><a href="#" onclick="openLink(\'Shop\')">Shop</a></div></div>';
+    // Combine both answers
+    var answer3 = '<div class="avatar"></div><div class="text_wrapper"><div class="text"><a href="#" onclick="openLink(\'aboutus\')">About Us</a></div></div>';
+    chatbotMessageElement.innerHTML = answer1 + '<br>' + answer2 + '<br>' + answer3;
+    break;
+    case "somanna":
+    var answer1 = '<div class="avatar"></div><div class="text_wrapper"><div class="text">1. <a href="#" onclick="openLink(\'somanna\')">Somanna</a> --> <a href="#" onclick="openLink(\'phone\')">990142687</a></div></div>';
+    // Second answer
+    var answer2 = '<div class="avatar"></div><div class="text_wrapper"><div class="text"><a href="#" onclick="openLink(\'Shop\')">Shop</a></div></div>';
+    // Combine both answers
+    var answer3 = '<div class="avatar"></div><div class="text_wrapper"><div class="text"><a href="#" onclick="openLink(\'aboutus\')">About Us</a></div></div>';
+    chatbotMessageElement.innerHTML = answer1 + '<br>' + answer2 + '<br>' + answer3;
+    break;
+    case "latakka":
+    var answer1 = '<div class="avatar"></div><div class="text_wrapper"><div class="text">1. <a href="#" onclick="openLink(\'latakka\')">Latakka</a> --> <a href="#" onclick="openLink(\'phone\')">990142687</a></div></div>';
+    // Second answer
+    var answer2 = '<div class="avatar"></div><div class="text_wrapper"><div class="text"><a href="#" onclick="openLink(\'Shop\')">Shop</a></div></div>';
+    // Combine both answers
+    var answer3 = '<div class="avatar"></div><div class="text_wrapper"><div class="text"><a href="#" onclick="openLink(\'aboutus\')">About Us</a></div></div>';
+    chatbotMessageElement.innerHTML = answer1 + '<br>' + answer2 + '<br>' + answer3;
+    break;
+    case "siddappa":
+    var answer1 = '<div class="avatar"></div><div class="text_wrapper"><div class="text">1. <a href="#" onclick="openLink(\'siddappa\')">siddappa</a> --> <a href="#" onclick="openLink(\'phone\')">786542687</a></div></div>';
+    // Second answer
+    var answer2 = '<div class="avatar"></div><div class="text_wrapper"><div class="text"><a href="#" onclick="openLink(\'Shop\')">Shop</a></div></div>';
+    // Combine both answers
+    var answer3 = '<div class="avatar"></div><div class="text_wrapper"><div class="text"><a href="#" onclick="openLink(\'aboutus\')">About Us</a></div></div>';
+    chatbotMessageElement.innerHTML = answer1 + '<br>' + answer2 + '<br>' + answer3;
+    break;
+    case "puttur":
+        chatbotMessageElement.innerHTML = '<div class="avatar"></div><div class="text_wrapper"><div class="text">Workers available --> 1. <a href="#" onclick="openLink(\'areca pluckers\')">areca pluckers</a>\n2. <a href="#" onclick="openLink(\'Pesticide sprayers\')">Pesticide sprayers</a>\n3. <a href="#" onclick="openLink(\'Grass grazers\')">Grass grazers</a></div></div>';
+            break;
+        case "shop":
+            chatbotMessageElement.innerHTML = '<div class="avatar"></div><div class="text_wrapper"><div class="text">Shop information:\nComing Soon</div></div>';
+            break;
+        case "aboutus":
+            chatbotMessageElement.innerHTML = '<div class="avatar"></div><div class="text_wrapper"><div class="text">About Us:\nOur information</div></div>';
+            break;
+        default:
+        var answer1 = "Select your location ";
+        // Second answer
+        var answer2 = "1. <a href='#' onclick='openLink(\"Vittal\")'>Vittal</a>";
+        // Combine both answers
+        var answer3 = "2. <a href='#' onclick='openLink(\"Puttur\")'>Puttur</a>"
+            chatbotMessageElement.innerHTML = answer1 + '<br>' + answer2 + '<br>' + answer3;;
+            break;
+    }
+
+    chatContainer.appendChild(chatbotMessageElement);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+}
+
+    function sendMessage() {
+        var inputElement = document.getElementById('chatInput');
+        var userMessage = inputElement.value;
+
+        // Clear the input field
+        inputElement.value = '';
+
+        // Handle the user's message
+        var userMessageElement = document.createElement('li');
+        userMessageElement.className = 'message right';
+        userMessageElement.innerHTML = '<div class="avatar"></div><div class="text_wrapper"><div class="text">' + userMessage + '</div></div>';
+        var chatContainer = document.getElementById('chatMessages');
+        chatContainer.appendChild(userMessageElement);
+        
+
+        // Get the chatbot's reply based on user input
+        var chatbotReply = handleUserInput(userMessage);
+
+        
+
+        // Scroll to the bottom to show the latest messages
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+
+        
+
+        setTimeout(function () {
+                var chatbotMessageElement = document.createElement('li');
+                chatbotMessageElement.className = 'message left';
+                chatbotMessageElement.innerHTML = '<div class="avatar"></div><div class="text_wrapper"><div class="text">' + chatbotReply + '</div></div>';
+                chatContainer.appendChild(chatbotMessageElement);
+
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }, 3000);
+        
+    }
+
+
+</script>
+
+
+
+
+</html>
